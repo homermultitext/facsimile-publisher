@@ -4,6 +4,7 @@ import edu.holycross.shot.citeobj._
 import edu.holycross.shot.dse._
 import org.homermultitext.edmodel._
 import edu.holycross.shot.scm._
+import edu.holycross.shot.dse._
 import scala.io.Source
 import better.files._
 import File._
@@ -11,7 +12,7 @@ import java.io.{File => JFile}
 import better.files.Dsl._
 
 val data = "data/hmt-2018g-rc1.cex"
-
+val dsedata = "data/va-dse.cex"
 /** Load a CiteLibrary from a file.
 *
 * @param fName Name of file to load
@@ -22,6 +23,19 @@ def lib(fName: String) : CiteLibrary = {
   val lib = CiteLibrary(cex, "#", ",")
   println("Done.")
   lib
+}
+
+def dse(fName: String) : DseVector = {
+
+  //val dseVector = DseSource.fromFile(fName)
+
+  val header = Source.fromFile("dsehdr.cex").getLines.toVector.mkString("\n")
+  val dseCex = Source.fromFile(fName).getLines.toVector.mkString("\n")
+
+  println("\n\nBuilding (slowly) DSE collection...")
+  val dseVector = DseVector(header +"\n" + dseCex)
+  println("Done.")
+  dseVector
 }
 
 
@@ -74,7 +88,7 @@ def sortTexts(psgs: Set[CtsUrn], corpus: Corpus): Corpus = {
 }
 
 
-def publishPage(prev: Option[CiteObject], pages: Vector[CiteObject], dir: File) : Unit = {
+def publishPage(prev: Option[CiteObject], pages: Vector[CiteObject], dir: File, dse: DseVector) : Unit = {
   val prevPage = prev match {
     case None => "--"
     case _ => prev.get.urn.objectComponent
@@ -104,12 +118,12 @@ def publishPage(prev: Option[CiteObject], pages: Vector[CiteObject], dir: File) 
   outFile.overwrite(md.toString)
   val remainder = pages.tail
   if (remainder.nonEmpty) {
-    publishPage(Some(pages.head), remainder, dir)
+    publishPage(Some(pages.head), remainder, dir, dse)
   }
 }
 
 
-def publishMS(ms: Cite2Urn, dir: File, subdirName: String, label: String, linkOne: String, clib: CiteLibrary) : Unit = {
+def publishMS(ms: Cite2Urn, dir: File, subdirName: String, label: String, linkOne: String, clib: CiteLibrary, dse: DseVector) : Unit = {
   setUp(dir)
 
   val homePage = dir/"index.md"
@@ -132,7 +146,7 @@ def publishMS(ms: Cite2Urn, dir: File, subdirName: String, label: String, linkOn
   // actually, this should recursively exhaust a list of
   // MSS so we can set up prev/next properly...
 
-  publishPage(None, pages, dir)
+  publishPage(None, pages, dir, dse)
 /*
   val rows = for(obj <- pages) yield {
     val imgProp = obj.urn.addProperty("image")
@@ -220,7 +234,7 @@ def publishMS(ms: Cite2Urn, dir: File, subdirName: String, label: String, linkOn
 
 
 
-def publish(citeLib: CiteLibrary): Unit = {
+def publish(citeLib: CiteLibrary, dse: DseVector): Unit = {
   val docs = File("docs")
   val homePage = docs/"index.md"
   val indexContents = indexPage(citeLib.name)
@@ -228,15 +242,17 @@ def publish(citeLib: CiteLibrary): Unit = {
 
   val mss = Vector((Cite2Urn("urn:cite2:hmt:msA.v1:"), docs/"venetus-a", "venetus-a", "The Venetus A manuscript", "12r"))
   for (ms <- mss) {
-    publishMS(ms._1, ms._2, ms._3, ms._4, ms._5, citeLib )
+    publishMS(ms._1, ms._2, ms._3, ms._4, ms._5, citeLib , dse)
   }
   println("Done.")
 }
 
 println("\n\nYou build a library from a file of data, e.g.:")
 println("\tval clib = lib(data)")
+println("\n\nYou also build a DseVector from a file of data, e.g.:")
+println("\tval dseVector = dse(dsedata)")
 println("\n\nYou can then publish a library:")
-println("\tpublish(clib)")
+println("\tpublish(clib, dseVector)")
 
 println("\n\nAlthernatively, a one-liner to write facsimiles:\n")
-println("\tpublish(lib(data))")
+println("\tpublish(lib(data), dse(dsedata)))")
