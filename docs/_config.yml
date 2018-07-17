@@ -1,0 +1,26 @@
+# Dependencies
+markdown:         kramdown
+redcarpet:
+ extensions: ["fenced_code_blocks", "autolink", "tables"]
+
+highlighter: rouge
+
+# Permalinks
+permalink:        pretty
+
+# Setup
+title:            Facsimile editions
+tagline:          'Manuscript facsimiles from the Homer Multitext project'
+description:      ''
+baseurl: '/facsimiles/'
+
+
+
+author:
+  name:           'Neel Smith'
+
+
+
+links:
+  - title: Venetus A
+    url: /venetus-a

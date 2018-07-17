@@ -37,7 +37,8 @@ def setUp(dir: File) : Unit = {
 // Compose text of home page
 def indexPage(version: String): String = {
   val md = StringBuilder.newBuilder
-  md.append("# Homer Multitext project: facsimile editions\n\n")
+
+  md.append(s"---\nlayout: page\ntitle: Homer Multitext project: facsimile editions\n---\n\n")
 
   md.append(s"## ${version}.\n")
 
@@ -90,13 +91,17 @@ def publishPage(prev: Option[CiteObject], pages: Vector[CiteObject], dir: File) 
 
 
   val md = StringBuilder.newBuilder
-  md.append(" # ${pages(0).urn}\n\n")
-  md.append(s"prev:  [${prevPage}](../${prevPage}/index)")
+  val pageUrn = pages(0).urn
+  md.append(s"---\nlayout: page\ntitle: Manuscript ${pageUrn.collection}, page ${pageUrn.objectComponent}\n---\n\n")
+  md.append(s"Manuscript ${pageUrn.collection}, page ${pageUrn.objectComponent}\n\n")
+  md.append(s"prev:  [${prevPage}](../${prevPage})")
   md.append(" | ")
-  md.append(s"next:  [${nextPage}](../${nextPage}/index)")
+  md.append(s"next:  [${nextPage}](../${nextPage})")
 
-  val outFile = dir/pages(0).urn.objectComponent.toString
-  outFile.overwrite(s"# ${pages(0).urn}\n\nprev-next:${pn}\n")
+
+  val fileName = pages(0).urn.objectComponent.toString + ".md"
+  val outFile = dir/fileName
+  outFile.overwrite(md.toString)
   val remainder = pages.tail
   if (remainder.nonEmpty) {
     publishPage(Some(pages.head), remainder, dir)
@@ -106,9 +111,13 @@ def publishPage(prev: Option[CiteObject], pages: Vector[CiteObject], dir: File) 
 
 def publishMS(ms: Cite2Urn, dir: File, label: String, clib: CiteLibrary) : Unit = {
   setUp(dir)
-  val md = StringBuilder.newBuilder
-  md.append(s"# ${label}\n\n")
+
   val homePage = dir/"index.md"
+  val md = StringBuilder.newBuilder
+  md.append(s"---\ntitle: ${label}\nlayout: page\n---\n\n")
+  md.append(s"${label}\n\n")
+
+
 
 
   println("Get pages for MS...")

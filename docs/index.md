@@ -1,5 +1,10 @@
+---
+layout: page
+title: Homer Multitext project: facsimile editions
+---
 
-Facsimile editions of the following manuscripts are available:
+Homer Multitext project: facsimile editions
 
-
--  Venetus A
+## Homer Multitext project, release 2018 F.
+- The [Venetus A](venetus-a):  facsimile including full edition of *Iliad* and scholia
+- The Venetus B (codex model only)
