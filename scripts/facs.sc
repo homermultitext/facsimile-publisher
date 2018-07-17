@@ -109,13 +109,14 @@ def publishPage(prev: Option[CiteObject], pages: Vector[CiteObject], dir: File) 
 }
 
 
-def publishMS(ms: Cite2Urn, dir: File, label: String, clib: CiteLibrary) : Unit = {
+def publishMS(ms: Cite2Urn, dir: File, subdirName: String, label: String, linkOne: String, clib: CiteLibrary) : Unit = {
   setUp(dir)
 
   val homePage = dir/"index.md"
   val md = StringBuilder.newBuilder
   md.append(s"---\ntitle: ${label}\nlayout: page\n---\n\n")
   md.append(s"${label}\n\n")
+  md.append(s"The *Iliad* begins on [${linkOne}](../${subdirName}/${linkOne})\n\n")
 
 
 
@@ -225,9 +226,9 @@ def publish(citeLib: CiteLibrary): Unit = {
   val indexContents = indexPage(citeLib.name)
   homePage.overwrite(indexContents)
 
-  val mss = Vector((Cite2Urn("urn:cite2:hmt:msA.v1:"), docs/"venetus-a", "The Venetus A manuscript"))
+  val mss = Vector((Cite2Urn("urn:cite2:hmt:msA.v1:"), docs/"venetus-a", "venetus-a", "The Venetus A manuscript", "12r"))
   for (ms <- mss) {
-    publishMS(ms._1, ms._2, ms._3, citeLib )
+    publishMS(ms._1, ms._2, ms._3, ms._4, ms._5, citeLib )
   }
   println("Done.")
 }
