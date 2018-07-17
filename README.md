@@ -1,2 +1,3 @@
-# facsimile-publisher
-Library to build markdown facsimile edition of a HMT text
+# Facsimile editions
+
+Facsimile editions of the Homer Multitext project.
