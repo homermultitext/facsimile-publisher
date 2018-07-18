@@ -124,7 +124,12 @@ def textPsgs(pg: Cite2Urn , textFilter: CtsUrn, dse: DseVector, corpus: Corpus )
     dse.passages.filter(_.passage ~~ psg.urn).map(_.imageroi)
     psg.text + imgMgr.markdown(imgGroup(0), imgSize)
   }
-  mds.mkString("\n\n")
+  if (mds.nonEmpty){
+    mds.mkString("\n\n")
+  } else {
+    "No texts matching `" + textFilter + "`"
+  }
+
 }
 
 
