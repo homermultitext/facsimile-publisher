@@ -5,6 +5,7 @@ import edu.holycross.shot.dse._
 import org.homermultitext.edmodel._
 import edu.holycross.shot.scm._
 import edu.holycross.shot.dse._
+import edu.holycross.shot.citerelation._
 import org.homermultitext.hmtmom._
 import scala.io.Source
 import better.files._
@@ -122,14 +123,17 @@ def textNodes(pg: Cite2Urn, textFilter: CtsUrn, dse:  DseVector, corpus: Corpus)
 }
 
 /** Collect text passages for a page.*/
-def textPsgs(pg: Cite2Urn , textFilter: CtsUrn, dse: DseVector, corpus: Corpus ) : String = {
-  println("Getting text nodes filtered on " + textFilter + "...")
-  val psgs = textNodes(pg,  textFilter, dse, corpus)
+def iliadPsgs(pg: Cite2Urn , textFilter: CtsUrn, dse: DseVector, corpus: Corpus ) : String = {
+  //textPsgs
+  println("Getting iliad filtered on " + textFilter + "...")
+  val psgs = textNodes(pg, textFilter, dse, corpus)
   println("done.  Got " + psgs.size)
   val mds =  for (psg <- psgs) yield  {
     println("\tcomposing entry for " + psg.urn + " ...")
     val imgGroup =
     dse.passages.filter(_.passage ~~ psg.urn).map(_.imageroi)
+
+    "<a name=\""+ psg.urn.passageComponent + "\"/>" +
     psg.text + imgMgr.markdown(imgGroup(0), imgSize)
   }
   if (mds.nonEmpty){
@@ -137,9 +141,30 @@ def textPsgs(pg: Cite2Urn , textFilter: CtsUrn, dse: DseVector, corpus: Corpus )
   } else {
     "No texts matching `" + textFilter + "`"
   }
-
 }
 
+def scholiaPsgs(pg: Cite2Urn , textFilter: CtsUrn, dse: DseVector, corpus: Corpus, relations: CiteRelationSet ) : String = {
+
+  println("Getting text nodes filtered on " + textFilter + "...")
+  val psgs = textNodes(pg,  textFilter, dse, corpus)
+  println("done.  Got " + psgs.size)
+  val mds =  for (psg <- psgs) yield  {
+    println("\tcomposing entry for " + psg.urn + " ...")
+    val imgGroup =
+    dse.passages.filter(_.passage ~~ psg.urn).map(_.imageroi)
+
+    val rels = relations.urn1Match(psg.urn).relations.toSeq
+    val iliadAny = rels(0).urn2
+    val iliad = CtsUrn(iliadAny.toString)
+
+    "commenting on [" + iliad.passageComponent + "](#" + iliad.passageComponent + ")  <a name=\"" + psg.urn.work + "_" + psg.urn.passageComponent + "\"/> " +    psg.text + imgMgr.markdown(imgGroup(0), imgSize)
+  }
+  if (mds.nonEmpty){
+    mds.mkString("\n\n")
+  } else {
+    "No texts matching `" + textFilter + "`"
+  }
+}
 
 /**  Recursively publish all pages in MS.
 *
@@ -149,7 +174,13 @@ def textPsgs(pg: Cite2Urn , textFilter: CtsUrn, dse: DseVector, corpus: Corpus )
 * @param dse Dse relations for this MS.
 * @param corpus Text corpus for this MS.
 */
-def publishPage(prev: Option[CiteObject], pages: Vector[CiteObject], dir: File, dse: DseVector, corpus: Corpus) : Unit = {
+def publishPage(
+  prev: Option[CiteObject],
+  pages: Vector[CiteObject],
+  dir: File,
+  dse: DseVector,
+  corpus: Corpus,
+  relations: CiteRelationSet) : Unit = {
   // THIS NEED TO BE BUILT FOR MS, NOT HARD CODED...
   val imgProp = Cite2Urn("urn:cite2:hmt:msA.v1.image:")
 
@@ -188,11 +219,11 @@ def publishPage(prev: Option[CiteObject], pages: Vector[CiteObject], dir: File, 
 
 
   md.append("## *Iliad* text\n\n")
-  md.append(textPsgs(pageUrn, CtsUrn("urn:cts:greekLit:tlg0012.tlg001:"), dse, corpus ))
+  md.append(iliadPsgs(pageUrn, CtsUrn("urn:cts:greekLit:tlg0012.tlg001:"), dse, corpus ))
 
 
   md.append("\n\n## *Scholia* text\n\n")
-  md.append(textPsgs(pageUrn,CtsUrn("urn:cts:greekLit:tlg5026:"), dse, corpus ))
+  md.append(scholiaPsgs(pageUrn,CtsUrn("urn:cts:greekLit:tlg5026:"), dse, corpus, relations ))
 
 
   val fileName = pages(0).urn.objectComponent.toString + ".md"
@@ -200,7 +231,7 @@ def publishPage(prev: Option[CiteObject], pages: Vector[CiteObject], dir: File, 
   outFile.overwrite(md.toString)
   val remainder = pages.tail
   if (remainder.nonEmpty) {
-    publishPage(Some(pages.head), remainder, dir, dse, corpus)
+    publishPage(Some(pages.head), remainder, dir, dse, corpus, relations)
   }
 }
 
@@ -213,7 +244,7 @@ def testOne(clib: CiteLibrary, dse: DseVector, pg: String) = {
   val pgObj = pages.filter(_.urn == pgUrn)
 
   val dir = File("docs/venetus-a")
-  publishPage(None, pgObj, dir, dse, clib.textRepository.get.corpus)
+  publishPage(None, pgObj, dir, dse, clib.textRepository.get.corpus, clib.relationSet.get)
   pgObj
 }
 /**
@@ -239,7 +270,7 @@ def publishMS(ms: Cite2Urn, dir: File, subdirName: String, label: String, linkOn
   //val colldata = citeLib.collectionRepository.get.objects
   //val pages = objMap ~~ vaPages
   md.append(s"Total of ${pages.size} pages\n\n")
-  publishPage(None, pages, dir, dse, clib.textRepository.get.corpus)
+  publishPage(None, pages, dir, dse, clib.textRepository.get.corpus, clib.relationSet.get)
   homePage.overwrite(md.toString)
 }
 
