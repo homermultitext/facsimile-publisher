@@ -263,6 +263,23 @@ def publishPage(
     publishPage(Some(pages.head), remainder, dir, dse, corpus, relations)
   }
 }
+//stitch("","", "urn:cite2:hmt:msA.v1:113v-115r","docs/venetus-a",clib,dseVector) 
+
+def stitch(beforeUrn: String, afterUrn: String, limitingUrn: String, dirName: String , clib: CiteLibrary, dse: DseVector) = {
+  val limitVal = Cite2Urn(limitingUrn)
+  val pages = clib.collectionRepository.get ~~ limitVal
+  println("Limited to ; " + limitVal)
+  println("FOUND THESE PAGES: "+ pages.size)
+  val reportDir = File(dirName)
+  publishPage(None, pages, reportDir, dse, clib.textRepository.get.corpus, clib.relationSet.get)
+/*
+* @param prev Optional CiteObject for previous page.
+* @param pages List of pages remaining to process.
+* @param dir Directory where files should be written.
+* @param dse Dse relations for this MS.
+* @param corpus Text corpus for this MS.
+  */
+}
 
 def testOne(clib: CiteLibrary, dse: DseVector, pg: String) = {
   val msA = Cite2Urn("urn:cite2:hmt:msA.v1:")
@@ -276,6 +293,7 @@ def testOne(clib: CiteLibrary, dse: DseVector, pg: String) = {
   publishPage(None, pgObj, dir, dse, clib.textRepository.get.corpus, clib.relationSet.get)
   pgObj
 }
+
 /**
 * @param ms URN identifying manuscript to publish.
 * @param dir Directory as file object where markdown files should be written.
