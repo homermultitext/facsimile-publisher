@@ -123,7 +123,7 @@ def textNodes(pg: Cite2Urn, textFilter: CtsUrn, dse:  DseVector, corpus: Corpus)
 }
 
 /** Collect text passages for a page.*/
-def iliadPsgs(pg: Cite2Urn , textFilter: CtsUrn, dse: DseVector, corpus: Corpus ) : String = {
+def iliadPsgs(pg: Cite2Urn , textFilter: CtsUrn, dse: DseVector, corpus: Corpus, relations: CiteRelationSet ) : String = {
   //textPsgs
   println("Getting iliad filtered on " + textFilter + "...")
   val psgs = textNodes(pg, textFilter, dse, corpus)
@@ -133,8 +133,18 @@ def iliadPsgs(pg: Cite2Urn , textFilter: CtsUrn, dse: DseVector, corpus: Corpus 
     val imgGroup =
     dse.passages.filter(_.passage ~~ psg.urn).map(_.imageroi)
 
-    "<a name=\""+ psg.urn.passageComponent + "\"/>" +
-    psg.text + imgMgr.markdown(imgGroup(0), imgSize)
+    val rels = relations.urn2Match(psg.urn).relations.toSeq
+
+    val fns = for ((rel,num) <- rels.zipWithIndex) yield {
+      val scholAny = rel.urn1
+      val schol = CtsUrn(scholAny.toString)
+      println("FOOTNOTING TO " + schol)
+      val idx = num +1
+      "[" + idx+ "](#" + schol.work + "_" + schol.passageComponent + ")"
+    }
+    println("SO..." + fns)
+
+    psg.urn.passageComponent + "<a id=\""+ psg.urn.passageComponent + "\"/>" + psg.urn.passageComponent + " " +  psg.text + imgMgr.markdown(imgGroup(0), imgSize) + fns.mkString(", ")
   }
   if (mds.nonEmpty){
     mds.mkString("\n\n")
@@ -157,7 +167,7 @@ def scholiaPsgs(pg: Cite2Urn , textFilter: CtsUrn, dse: DseVector, corpus: Corpu
     val iliadAny = rels(0).urn2
     val iliad = CtsUrn(iliadAny.toString)
 
-    "commenting on [" + iliad.passageComponent + "](#" + iliad.passageComponent + ")  <a name=\"" + psg.urn.work + "_" + psg.urn.passageComponent + "\"/> " +    psg.text + imgMgr.markdown(imgGroup(0), imgSize)
+    "commenting on [" + iliad.passageComponent + "](#" + iliad.passageComponent + ")  <a id=\"" + psg.urn.work + "_" + psg.urn.passageComponent + "\"/> " +    psg.text + imgMgr.markdown(imgGroup(0), imgSize)
   }
   if (mds.nonEmpty){
     mds.mkString("\n\n")
@@ -219,7 +229,7 @@ def publishPage(
 
 
   md.append("## *Iliad* text\n\n")
-  md.append(iliadPsgs(pageUrn, CtsUrn("urn:cts:greekLit:tlg0012.tlg001:"), dse, corpus ))
+  md.append(iliadPsgs(pageUrn, CtsUrn("urn:cts:greekLit:tlg0012.tlg001:"), dse, corpus , relations))
 
 
   md.append("\n\n## *Scholia* text\n\n")
