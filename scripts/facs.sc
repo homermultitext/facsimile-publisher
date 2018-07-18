@@ -88,13 +88,22 @@ def sortTexts(psgs: Set[CtsUrn], corpus: Corpus): Corpus = {
 
     println("\t... " + psg)
     val cns = (corpus ~~ psg)
-    if (cns.isEmpty) {
-      None
-    } else {
-      // SPECIAL CASE SCHOLIA HERE.
-      // COLLAPSE TO 2 levels and merge texts.
-      val cn = cns.nodes(0)
-      Some( (corpus.nodes.indexOf(cn), cn))
+    cns.size match {
+      case 1 => {
+        val cn = cns.nodes(0)
+        Some( (corpus.nodes.indexOf(cn), cn))
+      }
+      case 2 => {
+        val cn = cns.nodes(0)
+        val ordering = corpus.nodes.indexOf(cn)
+
+        val txt = cns.nodes(0).text + " " + cns.nodes(1).text
+        val doubleCn = CitableNode(cn.urn.collapsePassageTo(2), txt)
+        Some(ordering, doubleCn)
+            // SPECIAL CASE SCHOLIA HERE.
+            // COLLAPSE TO 2 levels and merge texts.
+      }
+      case _ => None
     }
   }
   Corpus(prs.flatten.toVector.sortBy(_._1).map(_._2))
@@ -105,9 +114,9 @@ def sortTexts(psgs: Set[CtsUrn], corpus: Corpus): Corpus = {
 */
 def textNodes(pg: Cite2Urn, textFilter: CtsUrn, dse:  DseVector, corpus: Corpus) : Vector[CitableNode] = {
   val txts =  dse.textsForTbs(pg)
-  println("Texts for tbs yields " + txts.size + "texts")
-  val iliad = txts.filter(_ ~~ textFilter)
-  val sorted = sortTexts(iliad.toSet, corpus)
+  println("Texts for tbs yields " + txts.size + " texts")
+  val filtered = txts.filter(_ ~~ textFilter)
+  val sorted = sortTexts(filtered.toSet, corpus)
   println("Sorted " + sorted.size + " nodes.")
   sorted.nodes
 }
@@ -118,7 +127,7 @@ def textPsgs(pg: Cite2Urn , textFilter: CtsUrn, dse: DseVector, corpus: Corpus )
   val psgs = textNodes(pg,  textFilter, dse, corpus)
   println("done.  Got " + psgs.size)
   val mds =  for (psg <- psgs) yield  {
-    println("Composing entry for " + psg + " ...")
+    println("\tcomposing entry for " + psg.urn + " ...")
     val imgGroup =
     dse.passages.filter(_.passage ~~ psg.urn).map(_.imageroi)
     psg.text + imgMgr.markdown(imgGroup(0), imgSize)
