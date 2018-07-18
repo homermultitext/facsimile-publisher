@@ -144,7 +144,7 @@ def iliadPsgs(pg: Cite2Urn , textFilter: CtsUrn, dse: DseVector, corpus: Corpus,
     }
     println("SO..." + fns)
 
-    psg.urn.passageComponent + " " +  "<a id=\""+ psg.urn.passageComponent + "\"/> " +  psg.text + imgMgr.markdown(imgGroup(0), imgSize) + fns.mkString(", ")
+    "*" + psg.urn.passageComponent + "* " +  "<a id=\""+ psg.urn.passageComponent + "\"/> " +  psg.text + imgMgr.markdown(imgGroup(0), imgSize) + fns.mkString(", ")
   }
   if (mds.nonEmpty){
     mds.mkString("\n\n")
