@@ -98,7 +98,7 @@ def sortTexts(psgs: Set[CtsUrn], corpus: Corpus): Corpus = {
         val cn = cns.nodes(0)
         val ordering = corpus.nodes.indexOf(cn)
 
-        val txt = cns.nodes(0).text + " " + cns.nodes(1).text
+        val txt = "**" + cns.nodes(0).text + "** " + cns.nodes(1).text
         val doubleCn = CitableNode(cn.urn.collapsePassageTo(2), txt)
         Some(ordering, doubleCn)
             // SPECIAL CASE SCHOLIA HERE.
@@ -167,7 +167,7 @@ def scholiaPsgs(pg: Cite2Urn , textFilter: CtsUrn, dse: DseVector, corpus: Corpu
     val iliadAny = rels(0).urn2
     val iliad = CtsUrn(iliadAny.toString)
 
-    "commenting on [" + iliad.passageComponent + "](#" + iliad.passageComponent + ")  <a id=\"" + psg.urn.work + "_" + psg.urn.passageComponent + "\"/> " +    psg.text + imgMgr.markdown(imgGroup(0), imgSize)
+    "*commenting on* [" + iliad.passageComponent + "](#" + iliad.passageComponent + ")  <a id=\"" + psg.urn.work + "_" + psg.urn.passageComponent + "\"/> " +    psg.text + imgMgr.markdown(imgGroup(0), imgSize)
   }
   if (mds.nonEmpty){
     mds.mkString("\n\n")
