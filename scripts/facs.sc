@@ -84,7 +84,6 @@ def pageRecord(folioSide: Cite2Urn, img: Cite2Urn, subDir: File) : Unit ={
 * and create a new corpus from the result.
 */
 def sortTexts(psgs: Set[CtsUrn], corpus: Corpus): Corpus = {
-  println("Sort " + psgs)
   val prs = for (psg <- psgs.toSeq) yield {
 
     println("\t... " + psg)
@@ -92,11 +91,11 @@ def sortTexts(psgs: Set[CtsUrn], corpus: Corpus): Corpus = {
     if (cns.isEmpty) {
       None
     } else {
+      // SPECIAL CASE SCHOLIA HERE.
+      // COLLAPSE TO 2 levels and merge texts.
       val cn = cns.nodes(0)
       Some( (corpus.nodes.indexOf(cn), cn))
     }
-
-
   }
   Corpus(prs.flatten.toVector.sortBy(_._1).map(_._2))
 }
@@ -113,7 +112,7 @@ def textNodes(pg: Cite2Urn, textFilter: CtsUrn, dse:  DseVector, corpus: Corpus)
   sorted.nodes
 }
 
-
+/** Collect text passages for a page.*/
 def textPsgs(pg: Cite2Urn , textFilter: CtsUrn, dse: DseVector, corpus: Corpus ) : String = {
   println("Getting text nodes filtered on " + textFilter + "...")
   val psgs = textNodes(pg,  textFilter, dse, corpus)
