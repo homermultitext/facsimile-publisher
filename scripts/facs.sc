@@ -141,6 +141,9 @@ def textPsgs(pg: Cite2Urn , textFilter: CtsUrn, dse: DseVector, corpus: Corpus )
 * @param corpus Text corpus for this MS.
 */
 def publishPage(prev: Option[CiteObject], pages: Vector[CiteObject], dir: File, dse: DseVector, corpus: Corpus) : Unit = {
+  // THIS NEED TO BE BUILT FOR MS, NOT HARD CODED...
+  val imgProp = Cite2Urn("urn:cite2:hmt:msA.v1.image:")
+
   // prev and next strings for links
   val prevPage = prev match {
     case None => "--"
@@ -158,11 +161,22 @@ def publishPage(prev: Option[CiteObject], pages: Vector[CiteObject], dir: File, 
 
   val md = StringBuilder.newBuilder
   val pageUrn = pages(0).urn
+
+
   md.append(s"---\nlayout: page\ntitle: Manuscript ${pageUrn.collection}, page ${pageUrn.objectComponent}\n---\n\n")
   md.append(s"Manuscript ${pageUrn.collection}, page ${pageUrn.objectComponent}\n\n")
+
+
+
+  val img = Cite2Urn(pages(0).propertyValue(imgProp).toString)
+  md.append(imgMgr.markdown(img,100) + "\n\n")
+
+
   md.append(s"prev:  [${prevPage}](../${prevPage})")
   md.append(" | ")
   md.append(s"next:  [${nextPage}](../${nextPage})\n\n")
+
+
 
   md.append("## *Iliad* text\n\n")
   md.append(textPsgs(pageUrn, CtsUrn("urn:cts:greekLit:tlg0012.tlg001:"), dse, corpus ))
@@ -181,6 +195,18 @@ def publishPage(prev: Option[CiteObject], pages: Vector[CiteObject], dir: File, 
   }
 }
 
+def testOne(clib: CiteLibrary, dse: DseVector, pg: String) = {
+  val msA = Cite2Urn("urn:cite2:hmt:msA.v1:")
+
+  val pages = clib.collectionRepository.get.objectsForCollection(msA)
+  val pgUrn = Cite2Urn(msA.toString + pg)
+  println(pgUrn)
+  val pgObj = pages.filter(_.urn == pgUrn)
+
+  val dir = File("docs/venetus-a")
+  publishPage(None, pgObj, dir, dse, clib.textRepository.get.corpus)
+  pgObj
+}
 /**
 * @param ms URN identifying manuscript to publish.
 * @param dir Directory as file object where markdown files should be written.
