@@ -44,6 +44,11 @@ def dse(fName: String) : DseVector = {
 }
 
 
+/** Create new blank directory to work in
+* by deleting if it already exists.
+*
+* @param dir Directory to work in.
+*/
 def setUp(dir: File) : Unit = {
   if (dir.exists) {
     dir.delete()
@@ -54,7 +59,7 @@ def setUp(dir: File) : Unit = {
 
 
 // Compose text of home page
-def indexPage(version: String): String = {
+def fascimilesHomePage(version: String): String = {
   val md = StringBuilder.newBuilder
 
   md.append(s"---\nlayout: page\ntitle: Homer Multitext project: facsimile editions\n---\n\n")
@@ -122,7 +127,14 @@ def textNodes(pg: Cite2Urn, textFilter: CtsUrn, dse:  DseVector, corpus: Corpus)
   sorted.nodes
 }
 
-/** Collect text passages for a page.*/
+/** Compose page section for displaying Iliad text.
+*
+* @param pg Page to show.
+* @param textFilter Limiting text URN.
+* @param dse Dse relations..
+* @param corpus Source textual corpus.
+* @param relations Relation set giving commentary<->text passage relation.
+*/
 def iliadPsgs(pg: Cite2Urn , textFilter: CtsUrn, dse: DseVector, corpus: Corpus, relations: CiteRelationSet ) : String = {
   //textPsgs
   println("Getting iliad filtered on " + textFilter + "...")
@@ -138,11 +150,9 @@ def iliadPsgs(pg: Cite2Urn , textFilter: CtsUrn, dse: DseVector, corpus: Corpus,
     val fns = for ((rel,num) <- rels.zipWithIndex) yield {
       val scholAny = rel.urn1
       val schol = CtsUrn(scholAny.toString)
-      println("FOOTNOTING TO " + schol)
       val idx = num +1
-      "[" + idx+ "](#" + schol.work + "_" + schol.passageComponent + ")"
+      "[" + idx+ "](#" + schol.work + "_" + schol.collapsePassageTo(2).passageComponent + ")"
     }
-    println("SO..." + fns)
 
     "*" + psg.urn.passageComponent + "* " +  "<a id=\""+ psg.urn.passageComponent + "\"/> " +  psg.text + imgMgr.markdown(imgGroup(0), imgSize) + fns.mkString(", ")
   }
@@ -153,6 +163,15 @@ def iliadPsgs(pg: Cite2Urn , textFilter: CtsUrn, dse: DseVector, corpus: Corpus,
   }
 }
 
+
+/** Compose page section for displaying schoilia text.
+*
+* @param pg Page to show.
+* @param textFilter Limiting text URN.
+* @param dse Dse relations..
+* @param corpus Source textual corpus.
+* @param relations Relation set giving commentary<->text passage relation.
+*/
 def scholiaPsgs(pg: Cite2Urn , textFilter: CtsUrn, dse: DseVector, corpus: Corpus, relations: CiteRelationSet ) : String = {
 
   println("Getting text nodes filtered on " + textFilter + "...")
@@ -167,7 +186,7 @@ def scholiaPsgs(pg: Cite2Urn , textFilter: CtsUrn, dse: DseVector, corpus: Corpu
     val iliadAny = rels(0).urn2
     val iliad = CtsUrn(iliadAny.toString)
 
-    "*commenting on* [" + iliad.passageComponent + "](#" + iliad.passageComponent + ")  <a id=\"" + psg.urn.work + "_" + psg.urn.passageComponent + "\"/> " +    psg.text + imgMgr.markdown(imgGroup(0), imgSize)
+    "*" + psg.urn.work +", " + psg.urn.collapsePassageTo(2).passageComponent + ", commenting on* [" + iliad.passageComponent + "](#" + iliad.passageComponent + ")  <a id=\"" + psg.urn.work + "_" + psg.urn.collapsePassageTo(2).passageComponent + "\"/> " +    psg.text + imgMgr.markdown(imgGroup(0), imgSize)
   }
   if (mds.nonEmpty){
     mds.mkString("\n\n")
@@ -288,7 +307,7 @@ def publishMS(ms: Cite2Urn, dir: File, subdirName: String, label: String, linkOn
 def publish(citeLib: CiteLibrary, dse: DseVector): Unit = {
   val docs = File("docs")
   val homePage = docs/"index.md"
-  val indexContents = indexPage(citeLib.name)
+  val indexContents = fascimilesHomePage(citeLib.name)
   homePage.overwrite(indexContents)
 
   val mss = Vector((Cite2Urn("urn:cite2:hmt:msA.v1:"), docs/"venetus-a", "venetus-a", "The Venetus A manuscript", "12r"))
