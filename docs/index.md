@@ -1,9 +1,9 @@
 ---
 layout: page
-title: Homer Multitext project: facsimile editions
+title: "Homer Multitext project: facsimile editions"
 ---
 
-## Homer Multitext project, release 2018 F.
+## Release 2018 F
 
 
 - The [Venetus A](venetus-a) (Marcianus Graecus Z. 454 / 822):  facsimile including full edition of *Iliad* and scholia
