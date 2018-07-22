@@ -28,17 +28,16 @@ val imgMgr = ImageManager()
 * @param relations Relations including scholia commenting on texts.
 * @param imgManager A configured ImageManager
 */
-case class FacsimileData (corpus: Corpus, dse: DseVector, relations: CiteRelationSet, imgManager: ImageManager = imgMgr) {}
+case class FacsimileData (pages: CiteCollectionData,corpus: Corpus, dse: DseVector, relations: CiteRelationSet, imgManager: ImageManager = imgMgr) {}
 
+
+def libPages(citeLib: CiteLibrary): CiteCollectionData = {
+    CiteCollectionData(Vector.empty[CitePropertyValue])
+}
 
 def libDse(citeLib: CiteLibrary): DseVector = {
   DseVector(Vector.empty[DsePassage])
 }
-
-def libRelations(citeLib: CiteLibrary): CiteRelationSet = {
-  CiteRelationSet(Set.empty[CiteTriple])
-}
-
 
 /** Load a CiteLibrary from a file.
 *
@@ -49,10 +48,14 @@ def loadData(fName: String = cex) : FacsimileData = {
   val cex = Source.fromFile(fName).getLines.mkString("\n")
   val lib = CiteLibrary(cex, "#", ",")
   println("Done loading...")
+
   val corpus = lib.textRepository.get.corpus
+  val relations = lib.relationSet.get
+  // extract specific data models from cite collections:
+  val pages = libPages(lib)
   val dse = libDse(lib)
-  val relations = libRelations(lib)
-  FacsimileData(corpus,dse,relations)
+
+  FacsimileData(pages, corpus, dse, relations)
 }
 
 
