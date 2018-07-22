@@ -28,14 +28,27 @@ val imgMgr = ImageManager()
 * @param relations Relations including scholia commenting on texts.
 * @param imgManager A configured ImageManager
 */
-case class FacsimileData (pages: CiteCollectionData,corpus: Corpus, dse: DseVector, relations: CiteRelationSet, imgManager: ImageManager = imgMgr) {}
+case class FacsimileData (pages: Map[Cite2Urn, Vector[Cite2Urn]],corpus: Corpus, dse: DseVector, relations: CiteRelationSet, imgManager: ImageManager = imgMgr) {}
 
 
-def libPages(citeLib: CiteLibrary): CiteCollectionData = {
-    CiteCollectionData(Vector.empty[CitePropertyValue])
+/** For all collections following the TBS model, maps collection URN
+* to an ordered list of surface URNs.
+*
+* @param citeLib Library to read data from.
+*/
+def libPages(citeLib: CiteLibrary): Map[Cite2Urn, Vector[Cite2Urn]] = {
+  val tbsModel = Cite2Urn("urn:cite2:cite:datamodels.v1:tbsmodel")
+  val tbsCollections = citeLib.collectionsForModel(tbsModel)
+  val pagesMap = citeLib.collectionRepository.get.collectionsMap.filterKeys(tbsCollections.contains(_))
+
+  pagesMap
 }
 
 def libDse(citeLib: CiteLibrary): DseVector = {
+
+  //val urnList = lib.collectionRepository.get.collectionsMap(tbs(0))
+
+
   DseVector(Vector.empty[DsePassage])
 }
 
@@ -53,6 +66,8 @@ def loadData(fName: String = cex) : FacsimileData = {
   val relations = lib.relationSet.get
   // extract specific data models from cite collections:
   val pages = libPages(lib)
+
+  //
   val dse = libDse(lib)
 
   FacsimileData(pages, corpus, dse, relations)
