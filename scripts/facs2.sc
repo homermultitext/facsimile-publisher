@@ -133,9 +133,19 @@ def publish(prev: Option[Cite2Urn], pageList: Vector[Cite2Urn], data: FacsimileD
     }
   }
   println("Process " + pageList(0))
+
+
   val md = StringBuilder.newBuilder
   md.append(s"---\nlayout: page\ntitle: Manuscript ${pageList(0).collection}, page ${pageList(0).objectComponent}\n---\n\n")
   md.append(s"Manuscript ${pageList(0).collection}, page ${pageList(0).objectComponent}\n\n")
+
+  val dse = data.dse(pageList(0).dropSelector)
+  val imgs = dse.imagesForTbs(pageList(0))
+  //val imgs = data.dse.imagesForTbs(pageList(0))
+  md.append(imgs.toString)
+
+  //val img = Cite2Urn(pages(0).propertyValue(imgProp).toString)
+  //  md.append(imgMgr.markdown(img,100) + "\n\n")
 
   val fileName = pageList(0).objectComponent.toString + ".md"
   val outFile = dir/fileName
