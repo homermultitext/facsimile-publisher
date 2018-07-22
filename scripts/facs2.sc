@@ -45,6 +45,11 @@ def libPages(citeLib: CiteLibrary): Map[Cite2Urn, Vector[Cite2Urn]] = {
 }
 
 
+/** From a CiteObject, create a DsePassage.
+*
+* @param co A CiteObject in a collection implementing the
+* DSE data model.
+*/
 def objectToDse(co: CiteObject): DsePassage = {
   DsePassage(co.urn,
     co.label,
@@ -55,12 +60,14 @@ def objectToDse(co: CiteObject): DsePassage = {
 }
 
 
-//: Map[DseVector] = {
-// THIS IS IMPOSSIBLY SLOW
-def libDse(citeLib: CiteLibrary) = {
-
+/** Map each collection implementing the DSE data model
+* to a DseVector.
+*
+*  @param citeLib Library with DSE collections.
+*/
+def libDse(citeLib: CiteLibrary) : Map[Cite2Urn, DseVector] = {
+  // This should happen in Dse library, but work it out here for now...
   val objs = citeLib.collectionRepository.get.objects
-
 
   val collData = citeLib.collectionRepository.get.data
   val dseModel = Cite2Urn("urn:cite2:cite:datamodels.v1:dsemodel")
@@ -73,7 +80,6 @@ def libDse(citeLib: CiteLibrary) = {
     (coll -> DseVector(records))
   }
 
-  // This should happen in Dse library, but work it out here for now...
   objMaps.toMap
 }
 
