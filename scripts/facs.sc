@@ -141,20 +141,25 @@ def iliadPsgs(pg: Cite2Urn , textFilter: CtsUrn, dse: DseVector, corpus: Corpus,
   val psgs = textNodes(pg, textFilter, dse, corpus)
   println("done.  Got " + psgs.size)
   val mds =  for (psg <- psgs) yield  {
+
+    // THIS IS WHERE IT'S FAILING
     println("\tcomposing entry for " + psg.urn + " ...")
     val imgGroup =
     dse.passages.filter(_.passage ~~ psg.urn).map(_.imageroi)
+    if (imgGroup.isEmpty) {
+      // ??
+      "No image in DSE records corresponding to passage " + psg.urn
+    } else {
+      val rels = relations.urn2Match(psg.urn).relations.toSeq
+      val fns = for ((rel,num) <- rels.zipWithIndex) yield {
+        val scholAny = rel.urn1
+        val schol = CtsUrn(scholAny.toString)
+        val idx = num +1
+        "[" + idx+ "](#" + schol.work + "_" + schol.collapsePassageTo(2).passageComponent + ")"
+      }
 
-    val rels = relations.urn2Match(psg.urn).relations.toSeq
-
-    val fns = for ((rel,num) <- rels.zipWithIndex) yield {
-      val scholAny = rel.urn1
-      val schol = CtsUrn(scholAny.toString)
-      val idx = num +1
-      "[" + idx+ "](#" + schol.work + "_" + schol.collapsePassageTo(2).passageComponent + ")"
+      "*" + psg.urn.passageComponent + "* " +  "<a id=\""+ psg.urn.passageComponent + "\"/> " +  psg.text + imgMgr.markdown(imgGroup(0), imgSize) + fns.mkString(", ")
     }
-
-    "*" + psg.urn.passageComponent + "* " +  "<a id=\""+ psg.urn.passageComponent + "\"/> " +  psg.text + imgMgr.markdown(imgGroup(0), imgSize) + fns.mkString(", ")
   }
   if (mds.nonEmpty){
     mds.mkString("\n\n")
@@ -183,10 +188,15 @@ def scholiaPsgs(pg: Cite2Urn , textFilter: CtsUrn, dse: DseVector, corpus: Corpu
     dse.passages.filter(_.passage ~~ psg.urn).map(_.imageroi)
 
     val rels = relations.urn1Match(psg.urn).relations.toSeq
-    val iliadAny = rels(0).urn2
-    val iliad = CtsUrn(iliadAny.toString)
+    if (rels.isEmpty) {
+      "No relations found for " + psg.urn
+    } else {
 
-    "*" + psg.urn.work +", " + psg.urn.collapsePassageTo(2).passageComponent + ", commenting on* [" + iliad.passageComponent + "](#" + iliad.passageComponent + ")  <a id=\"" + psg.urn.work + "_" + psg.urn.collapsePassageTo(2).passageComponent + "\"/> " +    psg.text + imgMgr.markdown(imgGroup(0), imgSize)
+      val iliadAny = rels(0).urn2
+      val iliad = CtsUrn(iliadAny.toString)
+
+      "*" + psg.urn.work +", " + psg.urn.collapsePassageTo(2).passageComponent + ", commenting on* [" + iliad.passageComponent + "](#" + iliad.passageComponent + ")  <a id=\"" + psg.urn.work + "_" + psg.urn.collapsePassageTo(2).passageComponent + "\"/> " +    psg.text + imgMgr.markdown(imgGroup(0), imgSize)
+    }
   }
   if (mds.nonEmpty){
     mds.mkString("\n\n")
@@ -263,7 +273,7 @@ def publishPage(
     publishPage(Some(pages.head), remainder, dir, dse, corpus, relations)
   }
 }
-//stitch("","", "urn:cite2:hmt:msA.v1:113v-115r","docs/venetus-a",clib,dseVector) 
+//stitch("","", "urn:cite2:hmt:msA.v1:113v-115r","docs/venetus-a",clib,dseVector)
 
 def stitch(beforeUrn: String, afterUrn: String, limitingUrn: String, dirName: String , clib: CiteLibrary, dse: DseVector) = {
   val limitVal = Cite2Urn(limitingUrn)
