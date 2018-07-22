@@ -18,6 +18,19 @@ import better.files.Dsl._
 * HMT data set.*/
 val cex = "data/hmt-2018g-rc1.cex"
 
+
+case class MsLabels (title: String, subdirName: String)
+
+val msMetadata :  Map[Cite2Urn, MsLabels]= Map (
+  (Cite2Urn("urn:cite2:hmt:msA.v1:") -> MsLabels("The Venetus A (Marcianus Graecus Z. 454 / 822)", "venetus-a")),
+  (Cite2Urn("urn:cite2:hmt:msB.v1:") -> MsLabels("Venetus B (Marciana 453 = 821)", "venetus-b")),
+  ( Cite2Urn("urn:cite2:hmt:u4.v1:")  -> MsLabels("Marciana 841 (Graecus Z. 458 = Allen U4)", "u4")),
+  (Cite2Urn("urn:cite2:hmt:e3.v1:") -> MsLabels("Escorial Y I.1 (294 = Allen E3)", "e3")),
+  (Cite2Urn("urn:cite2:hmt:e4.v1:") -> MsLabels("Escorial Ω I.12 (513 = Allen E4)", "e4")),
+  (Cite2Urn("urn:cite2:hmt:burney86:v1") -> MsLabels("The Townley Homer (British Library, Burney 86)", "burney86"))
+)
+
+
 /** Image manager using default configuration.*/
 val imgMgr = ImageManager()
 
@@ -28,7 +41,11 @@ val imgMgr = ImageManager()
 * @param relations Relations including scholia commenting on texts.
 * @param imgManager A configured ImageManager
 */
-case class FacsimileData (pages: Map[Cite2Urn, Vector[Cite2Urn]],corpus: Corpus, dse: Map[Cite2Urn, DseVector], relations: CiteRelationSet, imgManager: ImageManager = imgMgr) {}
+case class FacsimileData (
+  corpus: Corpus,
+  dse: Map[Cite2Urn, DseVector],
+  relations: CiteRelationSet,
+  imgManager: ImageManager = imgMgr) {}
 
 
 /** For all collections following the TBS model, maps collection URN
@@ -82,28 +99,18 @@ def libDse(citeLib: CiteLibrary) : Map[Cite2Urn, DseVector] = {
   objMaps.toMap
 }
 
-/** Load a CiteLibrary from a file.
+/** Load a CiteLibrary from a CEX file.
 *
-* @param fName Name of file to load
+* @param fName CEX file publishing HMT archive.
 */
-def loadData(fName: String = cex) : FacsimileData = {
-  println("Loading library:  please be patient...")
+def lib (fName: String = cex) : CiteLibrary = {
+  println(s"Loading library from ${fName}:  please be patient...")
   val cex = Source.fromFile(fName).getLines.mkString("\n")
   val lib = CiteLibrary(cex, "#", ",")
   println("Done loading...")
-
-  val corpus = lib.textRepository.get.corpus
-  val relations = lib.relationSet.get
-  // extract specific data models from cite collections:
-  val pages = libPages(lib)
-
-  //
-  println("Building DSE structures...")
-  val dse = libDse(lib)
-  println("Done.")
-
-  FacsimileData(pages, corpus, dse, relations)
+  lib
 }
+
 
 
 /** Compose String for a page to publish.
@@ -113,13 +120,78 @@ def composePage(page: Cite2Urn, data: FacsimileData): String = {
 }
 
 
-def publish(data: FacsimileData): Unit = {
-  val docs = File("docs")
+def publish(prev: Option[Cite2Urn], pageList: Vector[Cite2Urn], data: FacsimileData, dir: File): Unit = {
+  val prevPage = prev match {
+    case None => "--"
+    case _ => prev.get.objectComponent
+  }
+  val nextPage = {
+    pageList.size match {
+    case 0 => "--"
+    case 1 => "--"
+    case _ =>  pageList(1).objectComponent
+    }
+  }
+  println("Process " + pageList(0))
+  val md = StringBuilder.newBuilder
+  md.append(s"---\nlayout: page\ntitle: Manuscript ${pageList(0).collection}, page ${pageList(0).objectComponent}\n---\n\n")
+  md.append(s"Manuscript ${pageList(0).collection}, page ${pageList(0).objectComponent}\n\n")
+
+  val fileName = pageList(0).objectComponent.toString + ".md"
+  val outFile = dir/fileName
+  outFile.overwrite(md.toString)
+
+  val remainder = pageList.tail
+  if (remainder.nonEmpty) {
+    publish(Some(pageList.head), remainder, data, dir)
+  }
 }
 
-println("\n\nTo load data from the default CEX file:\n")
-println("\tval data = loadData()")
+/** Create new blank directory to work in
+* by deleting if it already exists.
+*
+* @param dir Directory to work in.
+*/
+def setUp(dir: File) : Unit = {
+  if (dir.exists) {
+    dir.delete()
+  }
+  mkdirs(dir)
+}
+
+
+/** Load a CiteLibrary from a file.
+*
+* @param fName Name of file to load
+*/
+def publishLib(lib: CiteLibrary ) : Unit = {
+  val corpus = lib.textRepository.get.corpus
+  val relations = lib.relationSet.get
+  println("Building DSE structures...")
+  val dse = libDse(lib)
+  println("Done.")
+  val data = FacsimileData(corpus, dse, relations)
+
+  val docs = File("docs2")
+  val pages = libPages(lib)
+  for (ms <- pages.keySet) {
+    val labels = msMetadata(ms)
+    val dir = docs/labels.subdirName
+    setUp(dir/labels.subdirName)
+
+    publish(None, pages(ms),data, dir)
+  }
+}
+
+
+
+
+
+
+
+println("\n\nTo load a CITE library from the  default CEX file:\n")
+println("\tval hmtLib = lib()")
 println("\nor supply the file name for your own CEX source:\n")
-println("\tval data = loadData(\"FILENAME\")")
-println("\n(Then someday publish with)")
-println("\tpublish(data)")
+println("\tval hmtLib = lib(\"FILENAME\")")
+println("\nThen publish with\n")
+println("\tpublishLib(hmtLib)")
