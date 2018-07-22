@@ -28,7 +28,7 @@ val imgMgr = ImageManager()
 * @param relations Relations including scholia commenting on texts.
 * @param imgManager A configured ImageManager
 */
-case class FacsimileData (pages: Map[Cite2Urn, Vector[Cite2Urn]],corpus: Corpus, dse: DseVector, relations: CiteRelationSet, imgManager: ImageManager = imgMgr) {}
+case class FacsimileData (pages: Map[Cite2Urn, Vector[Cite2Urn]],corpus: Corpus, dse: Map[Cite2Urn, DseVector], relations: CiteRelationSet, imgManager: ImageManager = imgMgr) {}
 
 
 /** For all collections following the TBS model, maps collection URN
@@ -44,10 +44,37 @@ def libPages(citeLib: CiteLibrary): Map[Cite2Urn, Vector[Cite2Urn]] = {
   pagesMap
 }
 
-def libDse(citeLib: CiteLibrary): DseVector = {
-  val dseModel = Cite2Urn("urn:cite2:cite:datamodels.v1:dsemodel")
 
-  DseVector(Vector.empty[DsePassage])
+def objectToDse(co: CiteObject): DsePassage = {
+  DsePassage(co.urn,
+    co.label,
+    CtsUrn(co.propertyValue(co.urn.addProperty("passage")).toString),
+    Cite2Urn(co.propertyValue(co.urn.addProperty("imageroi")).toString),
+    Cite2Urn(co.propertyValue(co.urn.addProperty("surface")).toString)
+  )
+}
+
+
+//: Map[DseVector] = {
+// THIS IS IMPOSSIBLY SLOW
+def libDse(citeLib: CiteLibrary) = {
+
+  val objs = citeLib.collectionRepository.get.objects
+
+
+  val collData = citeLib.collectionRepository.get.data
+  val dseModel = Cite2Urn("urn:cite2:cite:datamodels.v1:dsemodel")
+  val dseCollections = citeLib.collectionsForModel(dseModel)
+  val objMaps = for (coll <- dseCollections) yield {
+    val objUrns = citeLib.collectionRepository.get.collectionsMap(coll)
+    val records = for (obj <- objUrns) yield  {
+      objectToDse(objs.objectMap(obj))
+    }
+    (coll -> DseVector(records))
+  }
+
+  // This should happen in Dse library, but work it out here for now...
+  objMaps.toMap
 }
 
 /** Load a CiteLibrary from a file.
@@ -66,7 +93,9 @@ def loadData(fName: String = cex) : FacsimileData = {
   val pages = libPages(lib)
 
   //
+  println("Building DSE structures...")
   val dse = libDse(lib)
+  println("Done.")
 
   FacsimileData(pages, corpus, dse, relations)
 }
