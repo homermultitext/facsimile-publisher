@@ -334,10 +334,13 @@ def publishMS(ms: Cite2Urn, dir: File, subdirName: String, label: String, linkOn
 
 def publish(citeLib: CiteLibrary, dse: DseVector): Unit = {
   val docs = File("docs")
+  // for now, compose this file by hand.
+  /*
   val homePage = docs/"index.md"
   val indexContents = fascimilesHomePage(citeLib.name)
   homePage.overwrite(indexContents)
-
+  */
+  
   val mss = Vector((Cite2Urn("urn:cite2:hmt:msA.v1:"), docs/"venetus-a", "venetus-a", "The Venetus A manuscript", "12r"))
   for (ms <- mss) {
     publishMS(ms._1, ms._2, ms._3, ms._4, ms._5, citeLib , dse)
