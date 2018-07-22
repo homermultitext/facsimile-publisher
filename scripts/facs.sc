@@ -34,7 +34,7 @@ def dse(fName: String) : DseVector = {
 
   //val dseVector = DseSource.fromFile(fName)
 
-  val header = Source.fromFile("dsehdr.cex").getLines.toVector.mkString("\n")
+  val header = Source.fromFile("data/dsehdr.cex").getLines.toVector.mkString("\n")
   val dseCex = Source.fromFile(fName).getLines.toVector.mkString("\n")
 
   println("\n\nBuilding (slowly) DSE collection...")
