@@ -44,7 +44,6 @@ def libPages(citeLib: CiteLibrary): Map[Cite2Urn, Vector[Cite2Urn]] = {
   pagesMap
 }
 
-
 /** From a CiteObject, create a DsePassage.
 *
 * @param co A CiteObject in a collection implementing the
@@ -107,7 +106,11 @@ def loadData(fName: String = cex) : FacsimileData = {
 }
 
 
-
+/** Compose String for a page to publish.
+*/
+def composePage(page: Cite2Urn, data: FacsimileData): String = {
+  ""
+}
 
 
 def publish(data: FacsimileData): Unit = {
