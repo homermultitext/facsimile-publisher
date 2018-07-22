@@ -45,9 +45,7 @@ def libPages(citeLib: CiteLibrary): Map[Cite2Urn, Vector[Cite2Urn]] = {
 }
 
 def libDse(citeLib: CiteLibrary): DseVector = {
-
-  //val urnList = lib.collectionRepository.get.collectionsMap(tbs(0))
-
+  val dseModel = Cite2Urn("urn:cite2:cite:datamodels.v1:dsemodel")
 
   DseVector(Vector.empty[DsePassage])
 }

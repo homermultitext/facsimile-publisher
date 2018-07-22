@@ -18,6 +18,8 @@ val dsedata = "data/va-dse.cex"
 
 val imgMgr = ImageManager()
 val imgSize = 1000
+
+
 /** Load a CiteLibrary from a file.
 *
 * @param fName Name of file to load
@@ -340,7 +342,7 @@ def publish(citeLib: CiteLibrary, dse: DseVector): Unit = {
   val indexContents = fascimilesHomePage(citeLib.name)
   homePage.overwrite(indexContents)
   */
-  
+
   val mss = Vector((Cite2Urn("urn:cite2:hmt:msA.v1:"), docs/"venetus-a", "venetus-a", "The Venetus A manuscript", "12r"))
   for (ms <- mss) {
     publishMS(ms._1, ms._2, ms._3, ms._4, ms._5, citeLib , dse)
