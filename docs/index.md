@@ -10,4 +10,4 @@ title: "Homer Multitext project: facsimile editions"
 
 ### In progress
 
-- The [Venetus B](venetus-b) ((Marcianus Graecus Z. 453 / 821)) : browsable codex only. Not yet edited.
+- The [Venetus B](venetus-b) (Marcianus Graecus Z. 453 / 821) : browsable codex only. Not yet edited.
