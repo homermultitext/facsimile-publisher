@@ -69,9 +69,6 @@ def libPages(citeLib: CiteLibrary): Map[Cite2Urn, Vector[CiteObject]] = {
     (c -> objs)
   }
   mappedObjs.toMap
-  //val pagesMap = citeLib.collectionRepository.get.collectionsMap.filterKeys(tbsCollections.contains(_))
-
-  //pagesMap
 }
 
 
@@ -131,12 +128,16 @@ def publish(prev: Option[Cite2Urn], pageList: Vector[CiteObject], data: Facsimil
     case _ =>  pageList(1).urn.objectComponent
     }
   }
-  println("Process " + pageList(0).urn)
+  val page = pageList(0)
+  println("Process " + page.urn)
 
 
   val md = StringBuilder.newBuilder
-  md.append(s"---\nlayout: page\ntitle: Manuscript ${pageList(0).urn.collection}, page ${pageList(0).urn.objectComponent}\n---\n\n")
-  md.append(s"Manuscript ${pageList(0).urn.collection}, page ${pageList(0).urn.objectComponent}\n\n")
+  md.append(s"---\nlayout: page\ntitle: Manuscript ${page.urn.collection}, page ${page.urn.objectComponent}\n---\n\n")
+  md.append(s"Manuscript ${page.urn.collection}, page ${page.urn.objectComponent}\n\n")
+
+  val img = page.propertyValue(page.urn.addProperty("image")).asInstanceOf[Cite2Urn]
+  md.append(imgMgr.markdown(img,100) + "\n\n")
 
   //val dse = data.dse(pageList(0).urn.dropSelector)
 
@@ -170,6 +171,12 @@ def setUp(dir: File) : Unit = {
   mkdirs(dir)
 }
 
+
+/** Compose descriptions of TBS in library.
+*
+* @param mss Set of collections implementing TBS model.
+* @param dse DseVector for each collection.
+*/
 def composeHomePage(mss:  Set[Cite2Urn], dse: Map[Cite2Urn, DseVector]) : String = {
   ""
 }
