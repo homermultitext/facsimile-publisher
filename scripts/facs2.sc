@@ -60,12 +60,18 @@ case class FacsimileData (
 *
 * @param citeLib Library to read data from.
 */
-def libPages(citeLib: CiteLibrary): Map[Cite2Urn, Vector[Cite2Urn]] = {
+def libPages(citeLib: CiteLibrary): Map[Cite2Urn, Vector[CiteObject]] = {
   val tbsModel = Cite2Urn("urn:cite2:cite:datamodels.v1:tbsmodel")
   val tbsCollections = citeLib.collectionsForModel(tbsModel)
-  val pagesMap = citeLib.collectionRepository.get.collectionsMap.filterKeys(tbsCollections.contains(_))
 
-  pagesMap
+  val mappedObjs = for (c <- tbsCollections) yield {
+    val objs = citeLib.collectionRepository.get  ~~ c
+    (c -> objs)
+  }
+  mappedObjs.toMap
+  //val pagesMap = citeLib.collectionRepository.get.collectionsMap.filterKeys(tbsCollections.contains(_))
+
+  //pagesMap
 }
 
 
@@ -113,7 +119,7 @@ def composePage(page: Cite2Urn, data: FacsimileData): String = {
 }
 
 
-def publish(prev: Option[Cite2Urn], pageList: Vector[Cite2Urn], data: FacsimileData, dir: File): Unit = {
+def publish(prev: Option[Cite2Urn], pageList: Vector[CiteObject], data: FacsimileData, dir: File): Unit = {
   val prevPage = prev match {
     case None => "--"
     case _ => prev.get.objectComponent
@@ -122,31 +128,33 @@ def publish(prev: Option[Cite2Urn], pageList: Vector[Cite2Urn], data: FacsimileD
     pageList.size match {
     case 0 => "--"
     case 1 => "--"
-    case _ =>  pageList(1).objectComponent
+    case _ =>  pageList(1).urn.objectComponent
     }
   }
-  println("Process " + pageList(0))
+  println("Process " + pageList(0).urn)
 
 
   val md = StringBuilder.newBuilder
-  md.append(s"---\nlayout: page\ntitle: Manuscript ${pageList(0).collection}, page ${pageList(0).objectComponent}\n---\n\n")
-  md.append(s"Manuscript ${pageList(0).collection}, page ${pageList(0).objectComponent}\n\n")
+  md.append(s"---\nlayout: page\ntitle: Manuscript ${pageList(0).urn.collection}, page ${pageList(0).urn.objectComponent}\n---\n\n")
+  md.append(s"Manuscript ${pageList(0).urn.collection}, page ${pageList(0).urn.objectComponent}\n\n")
 
-  val dse = data.dse(pageList(0).dropSelector)
-  val imgs = dse.imagesForTbs(pageList(0))
+  //val dse = data.dse(pageList(0).urn.dropSelector)
+
+  /*  DO TBS RECORD FOR THIS
+  val img = dse.imageForTbs(pageList(0).urn)
   //val imgs = data.dse.imagesForTbs(pageList(0))
-  md.append(imgs.toString)
+  md.append(img.toString)
 
   //val img = Cite2Urn(pages(0).propertyValue(imgProp).toString)
   //  md.append(imgMgr.markdown(img,100) + "\n\n")
-
-  val fileName = pageList(0).objectComponent.toString + ".md"
+*/
+  val fileName = pageList(0).urn.objectComponent.toString + ".md"
   val outFile = dir/fileName
   outFile.overwrite(md.toString)
 
   val remainder = pageList.tail
   if (remainder.nonEmpty) {
-    publish(Some(pageList.head), remainder, data, dir)
+    publish(Some(pageList.head.urn), remainder, data, dir)
   }
 }
 
