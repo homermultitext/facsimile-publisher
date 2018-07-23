@@ -19,8 +19,15 @@ import better.files.Dsl._
 val cex = "data/hmt-2018g-rc1.cex"
 
 
+/** Labelling information for HMT manuscripts.
+*
+* @param title Full label to use as title.
+* @param  subdirName Name of subdirectory where
+* facsimile should be written.
+*/
 case class MsLabels (title: String, subdirName: String)
 
+/** Labelling metadata  for HMT manuscripts.*/
 val msMetadata :  Map[Cite2Urn, MsLabels]= Map (
   (Cite2Urn("urn:cite2:hmt:msA.v1:") -> MsLabels("The Venetus A (Marcianus Graecus Z. 454 / 822)", "venetus-a")),
   (Cite2Urn("urn:cite2:hmt:msB.v1:") -> MsLabels("Venetus B (Marciana 453 = 821)", "venetus-b")),
@@ -61,20 +68,6 @@ def libPages(citeLib: CiteLibrary): Map[Cite2Urn, Vector[Cite2Urn]] = {
   pagesMap
 }
 
-/** From a CiteObject, create a DsePassage.
-*
-* @param co A CiteObject in a collection implementing the
-* DSE data model.
-*/
-def objectToDse(co: CiteObject): DsePassage = {
-  DsePassage(co.urn,
-    co.label,
-    CtsUrn(co.propertyValue(co.urn.addProperty("passage")).toString),
-    Cite2Urn(co.propertyValue(co.urn.addProperty("imageroi")).toString),
-    Cite2Urn(co.propertyValue(co.urn.addProperty("surface")).toString)
-  )
-}
-
 
 /** Map each collection implementing the DSE data model
 * to a DseVector.
@@ -91,7 +84,7 @@ def libDse(citeLib: CiteLibrary) : Map[Cite2Urn, DseVector] = {
   val objMaps = for (coll <- dseCollections) yield {
     val objUrns = citeLib.collectionRepository.get.collectionsMap(coll)
     val records = for (obj <- objUrns) yield  {
-      objectToDse(objs.objectMap(obj))
+      DseVector.fromCitableObject(objs.objectMap(obj))
     }
     (coll -> DseVector(records))
   }
