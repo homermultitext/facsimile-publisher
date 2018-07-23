@@ -170,7 +170,9 @@ def setUp(dir: File) : Unit = {
   mkdirs(dir)
 }
 
-
+def composeHomePage(mss:  Set[Cite2Urn], dse: Map[Cite2Urn, DseVector]) : String = {
+  ""
+}
 /** Load a CiteLibrary from a file.
 *
 * @param fName Name of file to load
@@ -182,9 +184,11 @@ def publishLib(lib: CiteLibrary ) : Unit = {
   val dse = libDse(lib)
   println("Done.")
   val data = FacsimileData(corpus, dse, relations)
+  val pages = libPages(lib)
+
 
   val docs = File("docs2")
-  val pages = libPages(lib)
+  val homePage = composeHomePage(pages.keySet, dse)
   for (ms <- pages.keySet) {
     val labels = msMetadata(ms)
     val dir = docs/labels.subdirName
