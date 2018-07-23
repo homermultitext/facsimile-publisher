@@ -138,17 +138,12 @@ def publish(prev: Option[Cite2Urn], pageList: Vector[CiteObject], data: Facsimil
 
   val img = page.propertyValue(page.urn.addProperty("image")).asInstanceOf[Cite2Urn]
   md.append(imgMgr.markdown(img,100) + "\n\n")
+  md.append(s"prev:  [${prevPage}](../${prevPage})")
+  md.append(" | ")
+  md.append(s"next:  [${nextPage}](../${nextPage})\n\n")
 
   //val dse = data.dse(pageList(0).urn.dropSelector)
 
-  /*  DO TBS RECORD FOR THIS
-  val img = dse.imageForTbs(pageList(0).urn)
-  //val imgs = data.dse.imagesForTbs(pageList(0))
-  md.append(img.toString)
-
-  //val img = Cite2Urn(pages(0).propertyValue(imgProp).toString)
-  //  md.append(imgMgr.markdown(img,100) + "\n\n")
-*/
   val fileName = pageList(0).urn.objectComponent.toString + ".md"
   val outFile = dir/fileName
   outFile.overwrite(md.toString)
