@@ -11,7 +11,7 @@ libraryDependencies ++= Seq(
   "edu.holycross.shot" %% "cex" % "6.2.1",
   "edu.holycross.shot.cite" %% "xcite" % "3.5.0",
   "edu.holycross.shot" %% "ohco2" % "10.9.0",
-  "edu.holycross.shot" %% "dse" % "4.1.0",
+  "edu.holycross.shot" %% "dse" % "4.2.0",
   "edu.holycross.shot" %% "scm" % "6.1.1",
   "org.homermultitext" %% "hmt-textmodel" % "4.0.0",
   "org.homermultitext" %% "hmtcexbuilder" % "3.2.0",
