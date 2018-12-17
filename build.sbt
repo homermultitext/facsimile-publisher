@@ -1,5 +1,9 @@
-// Build file for an HMT editorial repository.
-// This file should live in the root directory of your repository.
+
+javaOptions in run ++= Seq(
+   "-Xms256M",
+   "-Xmx4G"
+ )
+
 
 resolvers += Resolver.jcenterRepo
 resolvers += Resolver.bintrayRepo("neelsmith", "maven")

@@ -253,9 +253,9 @@ def publishPage(
   md.append(imgMgr.markdown(img,100) + "\n\n")
 
 
-  md.append(s"prev:  [${prevPage}](../${prevPage})")
+  md.append(s"prev:  [${prevPage}](../${prevPage}/)")
   md.append(" | ")
-  md.append(s"next:  [${nextPage}](../${nextPage})\n\n")
+  md.append(s"next:  [${nextPage}](../${nextPage}/)\n\n")
 
 
 
@@ -334,8 +334,8 @@ def publishMS(ms: Cite2Urn, dir: File, subdirName: String, label: String, linkOn
 }
 
 
-def publish(citeLib: CiteLibrary, dse: DseVector): Unit = {
-  val docs = File("docs")
+def publish(citeLib: CiteLibrary, dse: DseVector, dirName: String): Unit = {
+  val docs = File(dirName)
   // for now, compose this file by hand.
   /*
   val homePage = docs/"index.md"
@@ -355,7 +355,7 @@ println("\tval clib = lib(data)")
 println("\n\nYou also build a DseVector from a file of data, e.g.:")
 println("\tval dseVector = dse(dsedata)")
 println("\n\nYou can then publish a library:")
-println("\tpublish(clib, dseVector)")
+println("\tpublish(clib, dseVector, directoryName)")
 
 println("\n\nAlthernatively, a one-liner to write facsimiles:\n")
-println("\tpublish(lib(data), dse(dsedata)))")
+println("\tpublish(lib(data), dse(dsedata), \"docs\")")
