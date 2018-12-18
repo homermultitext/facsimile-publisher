@@ -1,9 +1,4 @@
 
-javaOptions in run ++= Seq(
-   "-Xms256M",
-   "-Xmx4G"
- )
-
 
 resolvers += Resolver.jcenterRepo
 resolvers += Resolver.bintrayRepo("neelsmith", "maven")

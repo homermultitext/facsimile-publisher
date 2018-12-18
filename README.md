@@ -8,4 +8,9 @@ It's painfully slow, but the static output is usable.  This generates the fascim
 To build:
 
 1.  Open an sbt console and `:load scripts/facs.sc`
-2.  Follow the instructions to 
+2.  Follow the instructions to build a markdown directory you can serve directly from jekyll.
+
+
+## Requirements
+
+The script requires a large quantity of RAM.  This is set to 4 Gb in the included `.sbtopts` file.
