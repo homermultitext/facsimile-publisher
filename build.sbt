@@ -11,6 +11,7 @@ resolvers += Resolver.bintrayRepo("neelsmith", "maven")
 
 scalaVersion := "2.12.4"
 libraryDependencies ++= Seq(
+  "org.scalatest" %% "scalatest" % "3.0.1" % "test",
 
   "edu.holycross.shot" %% "citerelations" % "2.3.0",
   "edu.holycross.shot" %% "cex" % "6.2.1",
