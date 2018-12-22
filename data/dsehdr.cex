@@ -1,5 +1,5 @@
 #!citelibrary
 
-name#Sample library for scripting the HMT
-urn#urn:cite2:hmt:unpublished.cexscripts:all
+name#Library for building HMT facsimiles
+urn#urn:cite2:hmt:unpublished.facslib:all
 license#Creative Commons Attribution, Non-Commercial 4.0 License <https://creativecommons.org/licenses/by-nc/4.0/>.
