@@ -13,7 +13,7 @@ import File._
 import java.io.{File => JFile}
 import better.files.Dsl._
 
-val data = "data/hmt-2018g-rc1.cex"
+val data = "data/hmt-2018g-rc2.cex"
 val dsedata = "data/va-dse.cex"
 
 val imgMgr = ImageManager()
